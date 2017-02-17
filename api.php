@@ -25,7 +25,7 @@
 
     }
 
-    function safeColor($index) {
+  function safeColor($index) {
         global $request;
         $num = 0;
         if (isset($request[$index])) {
