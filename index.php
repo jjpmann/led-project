@@ -181,7 +181,7 @@
                 $(this).css('')
             });
 
-            $('.colors').on('click', 'div', function(){
+            $('.colors').on('click', '.block', function(){
                 var $this = $(this),
                     background = $this.css('background-color');
                     color = rgb(background);
