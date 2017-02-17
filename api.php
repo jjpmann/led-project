@@ -11,9 +11,14 @@
 
     // get the HTTP method, path and body of the request
     $method = $_SERVER['REQUEST_METHOD'];
-    $request = explode('/', trim($_SERVER['PATH_INFO'],'/'));
+    $qs = '';
+    if (isset($_SERVER['QUERY_STRING'])) {
+        $qs = $_SERVER['QUERY_STRING'];
+    }
+    
+    $request = explode('/', trim($qs,'/'));
     $input = json_decode(file_get_contents('php://input'),true);
-     
+
     $actions = [
         'on'    => 'turnOn',
         'off'   => 'turnOff',

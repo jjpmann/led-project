@@ -141,7 +141,7 @@
             // Stuff to do as soon as the DOM is ready;
                 
             var $div = $('div.colors'),
-                url = '/api.php/';
+                url = '/api.php?';
 
             var content = colors.map(function(color){
                 return '<div class="block" style="background-color: ' + color + '"><div class="inner"></div></div>';
