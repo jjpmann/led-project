@@ -4,17 +4,15 @@ class MagicHomeApi
 {
     const API_PORT = 5577;
 
-    protected $debug = true;
-
-    private $device_ip;
-    private $device_type = 0;
-    private $latest_connection;
-    private $keep_alive;
-
+    protected $socket;
+    protected $device_ip;
+    protected $device_type = 0;
+    protected $latest_connection;
+    protected $keep_alive;
+    protected $debug = false;
+    protected $color    = [];
     protected $messages = [];
-
-    private $socket;
-
+    
     public function __construct($ip, $type = 0, $keep_alive = true)
     {
         $this->device_ip = $ip;
@@ -40,19 +38,21 @@ class MagicHomeApi
         }
     }
 
+    public function debug()
+    {
+        $this->debug = true;
+    }
+
     public function status()
     {
         $this->log('Get status from Controller.');
         $this->send(0x81, 0x8A, 0x8B, 0x96);
-        $r = $this->waitResponse();
-        echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $r ); exit;
-        
+        $resp = $this->waitResponse();
     }
 
     public function updateColor($r = 0, $g = 0, $b = 0)
     {
         $this->log("Tring to update color: {$r}, {$g}, {$b}.");
-        //$msg = [0x31, $r, $g, $b];
         $msg = [
             0x31, 
             $this->checkNumberRange($r), 
@@ -70,16 +70,12 @@ class MagicHomeApi
     {   
         $this->log("Trying to turn off node.");
         $this->send(0x71, 0x24, 0x0F, 0xA4);
-        //if self.device_type < 4 else self.send_bytes(0xCC, 0x24, 0x33)
-    
     }
 
     public function turnOn()
     {   
         $this->log("Trying to turn on node.");
         $this->send(0x71, 0x23, 0x0F, 0xA3);
-        //if self.device_type < 4 else self.send_bytes(0xCC, 0x24, 0x33)
-    
     }
 
     protected function send(...$bytes)
@@ -110,7 +106,7 @@ class MagicHomeApi
         $tries = 3;
         $counter = 0;
         while ($status == $response) {
-            $status = socket_read($this->sock, 2048);
+            $status = socket_read($this->sock, 14);
             if(!$status){
                 if($counter >= $tries){
                     break;
@@ -120,7 +116,12 @@ class MagicHomeApi
                 }
             }
         }
-        return $response;
+        if ($status) {
+            $array = unpack("C*", $status);
+            $this->color = array_splice($array, 6, 3);
+        }
+
+        return $array;
     }
 
     private function checksum(...$bytes)

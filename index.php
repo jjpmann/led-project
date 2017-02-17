@@ -4,15 +4,12 @@
     <title>Color Table</title>
 
     <style>
-        .colorWrapper {
-            max-height: 500px;
-            min-height: 400px;
-        }
+        
         #colorchart{border:0;padding:0;border-collapse:collapse; width: 100%; height: 100%;}
         #colorchart .block{width:50px;height:30px;}
-        .colors {
+        .content {
             counter-reset: my-counter;
-            width: 1300px;
+            max-width: 1300px;
             margin: 40px auto;
             z-index: 1;
             position: relative;
@@ -21,7 +18,7 @@
         .colors > .block {
             display: block;
             height: 50px;
-            width: 50px;
+            width: 3.85%;
             margin: 1px;
             float: left;
             position: relative;
@@ -49,10 +46,11 @@
         .colors > .block:nth-child(25n+1) {
             clear: both;
         }
-
+    
         @media (min-width:621px) and (max-width: 1299px) {
-            .colors {
+            .content {
                 max-width: 900px;
+                min-width: 620px;
             }
             .colors > .block {
 
@@ -81,10 +79,15 @@
                 clear: both;
             }
         }
+        @media (min-width:621px) and (max-width: 700px) {
+            .colors > .block {
+                width: 7.3%;
+            }
+        }
 
         @media (max-width:620px) {
             /*body { background: red ;}*/
-            .colors {
+            .content {
                 width: 320px;
             }
             .colors .block {
@@ -126,11 +129,11 @@
 </head>
 <body>
 
-
-    <div class="controls"><button class="toggleOn">On</button><button class='toggleOff'>Off</button></div>
-    <div class="status"></div>
-    <div class="colors"></div>
-    
+    <div class="content">
+        <div class="controls"><button class="toggleOn">On</button><button class='toggleOff'>Off</button></div>
+        <div class="status"></div>
+        <div class="colors"></div>
+    </div>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
