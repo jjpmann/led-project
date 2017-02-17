@@ -43,11 +43,16 @@ class MagicHomeApi
         $this->debug = true;
     }
 
+    public function getColor()
+    {
+        return $this->color;
+    }
+
     public function status()
     {
         $this->log('Get status from Controller.');
         $this->send(0x81, 0x8A, 0x8B, 0x96);
-        $resp = $this->waitResponse();
+        return $this->waitResponse();
     }
 
     public function updateColor($r = 0, $g = 0, $b = 0)
@@ -119,9 +124,10 @@ class MagicHomeApi
         if ($status) {
             $array = unpack("C*", $status);
             $this->color = array_splice($array, 6, 3);
+            return $array;
         }
 
-        return $array;
+        return $status;
     }
 
     private function checksum(...$bytes)

@@ -22,7 +22,8 @@
     $actions = [
         'on'    => 'turnOn',
         'off'   => 'turnOff',
-        'color' => 'updateColor'
+        'color' => 'updateColor',
+        'status'=> 'status'
     ];
 
     function g($arr, $var)
@@ -30,7 +31,8 @@
 
     }
 
-  function safeColor($index) {
+  function safeColor($index) 
+  {
         global $request;
         $num = 0;
         if (isset($request[$index])) {
@@ -45,30 +47,38 @@
         return $num;
     }
 
+    function setColor()
+    {
+
+    }
+
     $action = '';
     if (isset($actions[$request[0]])) {
         $action = $actions[$request[0]];
 
-        if ($action == 'updateColor') {
-
-            $r = safeColor(1);
-            $g = safeColor(2);
-            $b = safeColor(3);
-            $controller->{$action}($r, $g, $b);
-        } else {
-            $controller->{$action}();
+        switch ($action) {
+            case 'updateColor':
+                $r = safeColor(1);
+                $g = safeColor(2);
+                $b = safeColor(3);
+                $resp = $controller->{$action}($r, $g, $b);
+                $color = [$r, $g, $b];
+                break;
+            case 'status':
+                $resp = $controller->status();
+                $color = $controller->getColor();
+                break;
+            default:
+                $resp = $controller->{$action}();
+                $color = $controller->getColor();
+                break;
         }
-
-        
     }
 
+    $data = [
+        'status'=> (bool) $resp, 
+        'color' => $color
+    ];
 
-    // $controller->turnOn();
-    // //
-    // $controller->updateColor(255, 0, 0);
-    // //$controller->updateColor(0, 255, 0);
-    //$controller->updateColor(0, 0, 255);
-    //
-    // [49, 0, 255, 0, 0, 0, 15, 63]
-
-    die('..');
+    header('Content-Type: application/json');
+    die(json_encode($data));    
