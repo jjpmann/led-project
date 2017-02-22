@@ -133,6 +133,7 @@
 <body>
 
     <div class="content">
+        <div class="video"><img style="-webkit-user-select: none;" src="http://192.168.1.81/mjpeg.cgi"></div>
         <div class="controls">
             <button class="toggleOn">On</button>
             <button class='toggleOff'>Off</button>
