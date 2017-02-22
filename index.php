@@ -4,7 +4,7 @@
     <title>Color Table</title>
 
     <style>
-        
+        .video img { width: 300px; height: 300px; }
         #colorchart{border:0;padding:0;border-collapse:collapse; width: 100%; height: 100%;}
         #colorchart .block{width:50px;height:30px;}
         .content {
@@ -133,7 +133,7 @@
 <body>
 
     <div class="content">
-        <div class="video"><img style="-webkit-user-select: none;" src="http://192.168.1.81/mjpeg.cgi"></div>
+        <div class="video"><img src="http://admin:pw4Admin@192.168.1.81/mjpeg.cgi"></div>
         <div class="controls">
             <button class="toggleOn">On</button>
             <button class='toggleOff'>Off</button>
