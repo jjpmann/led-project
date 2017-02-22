@@ -133,7 +133,12 @@
 <body>
 
     <div class="content">
-        <div class="video"><img src="http://admin:pw4Admin@192.168.1.81/mjpeg.cgi"></div>
+        <div class="video">
+            <video width="320" height="240" src="http://admin:pw4Admin@192.168.1.81/mjpeg.cgi">
+                Your browser does not support the video tag.
+            </video>
+            <?php /*<img src="http://admin:pw4Admin@192.168.1.81/mjpeg.cgi"> */ ?>
+        </div>
         <div class="controls">
             <button class="toggleOn">On</button>
             <button class='toggleOff'>Off</button>
