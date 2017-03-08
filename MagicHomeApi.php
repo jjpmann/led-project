@@ -2,16 +2,21 @@
 
 class MagicHomeApi 
 {
-    const API_PORT = 5577;
+    const API_PORT          = 5577;
+    const DISCOVERY_PORT    = 48899;
 
     protected $socket;
     protected $device_ip;
     protected $device_type = 0;
     protected $latest_connection;
     protected $keep_alive;
-    protected $debug = false;
+    protected $debug    = false;
     protected $color    = [];
     protected $messages = [];
+    protected $power    = false;
+    protected $timeout  = 10; 
+
+    protected $last_status;
     
     public function __construct($ip, $type = 0, $keep_alive = true)
     {
@@ -117,17 +122,71 @@ class MagicHomeApi
                     break;
                 }else{
                     $counter++;
-                    sleep(3);
+                    sleep(1);
                 }
             }
         }
         if ($status) {
             $array = unpack("C*", $status);
+            $this->last_status = $array;
             $this->color = array_splice($array, 6, 3);
+            $this->power = $array[2] == 35;
             return $array;
         }
 
         return $status;
+    }
+
+    public static function scan()
+    {
+    
+        // sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        // sock.bind(('', DISCOVERY_PORT))
+        // sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        
+        $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        $bind = socket_bind($sock, 'localhost', 48899);
+        $opt = socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
+
+        $msg = "HF-A11ASSISTHREAD";
+        
+
+        
+        # set the time at which we will quit the search
+        $quit_time = time() + 15;
+
+        $response_list = [];
+        # outer loop for query send
+        while (time() > $quit_time) {
+            # send out a broadcast query
+            $sock->sendto($msg, '<broadcast>', 48899);
+            
+            # inner loop waiting for responses
+            while (true) {
+                    echo time();
+                    // data, addr = $sock.recvfrom(64);
+                    $data = false;
+                    $resp = socket_recvfrom($sock, $data, 12, 0);
+                //except socket.timeout:
+                //    data = None
+                    if (time() > $quit_time) {
+                        break;
+                    }
+    
+                // if data is not None and data != msg:
+                //     # tuples of IDs and IP addresses
+                //     item = dict()
+                //     item['ipaddr'] = data.split(',')[0]
+                //     item['id'] = data.split(',')[1]
+                //     item['model'] = data.split(',')[2]
+                //     response_list.append(item)
+            }
+
+            echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $resp ); exit;
+        }
+
+        // self.found_bulbs = response_list
+        // return response_list
     }
 
     private function checksum(...$bytes)
