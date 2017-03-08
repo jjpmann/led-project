@@ -51,7 +51,10 @@ class MagicHomeApi
     public function status()
     {
         $this->log('Get status from Controller.');
-        $this->send(0x81, 0x8A, 0x8B, 0x96);
+        socket_clear_error();
+        $status = $this->send(0x81, 0x8A, 0x8B);
+        // echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $status ); exit;
+        
         return $this->waitResponse();
     }
 
@@ -67,28 +70,46 @@ class MagicHomeApi
             0x00, 
             0x0f
         ];
-        $msg[] = $this->checksum($msg);
         $this->send(...$msg);
+
+        //return $this->waitResponse();
+
+        // sleep(3);
+        // return $this->status();
+    }
+
+    public function isOn()
+    {
+        // $this->status();
+        return $this->power;
     }
 
     public function turnOff()
     {   
         $this->log("Trying to turn off node.");
-        $this->send(0x71, 0x24, 0x0F, 0xA4);
+        $this->send(0x71, 0x24, 0x0F);
+        // sleep(.4);
+        // return $this->status();
     }
 
     public function turnOn()
     {   
         $this->log("Trying to turn on node.");
-        $this->send(0x71, 0x23, 0x0F, 0xA3);
+        $this->send(0x71, 0x23, 0x0F);
+        // sleep(.4);
+        // return $this->status();
     }
 
     protected function send(...$bytes)
     {
 
+        $bytes[] = $this->checksum($bytes);
+
         $packed = pack('C*', ...$bytes);
         $len = strlen($packed);
 
+
+        $this->log("-- Sending: " . print_r($bytes, true));
         socket_send($this->sock, $packed, $len, MSG_DONTROUTE);
 
         $errorcode = socket_last_error();
@@ -101,7 +122,21 @@ class MagicHomeApi
         if ($this->debug) {
             echo print_r($this->messages, true);
         }
- 
+
+        // $status  = false;
+        // $bytes = socket_recv($this->sock, $status, 14, MSG_WAITALL);
+
+        // echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $bytes ); exit;
+        
+        // if ($status) {
+        //     $array = unpack("C*", $status);
+        //     $this->last_status = $array;
+        //     $this->color = array_splice($array, 6, 3);
+        //     $this->power = $array[2] == 35;
+        //     return $array;
+        // }
+        
+        // return false;
     }
 
     function waitResponse($response = "") 
