@@ -12,6 +12,7 @@ class MagicHomeApi
     protected $debug = false;
     protected $color    = [];
     protected $messages = [];
+    protected $power    = false;
     
     public function __construct($ip, $type = 0, $keep_alive = true)
     {
@@ -158,7 +159,9 @@ class MagicHomeApi
         }
         if ($status) {
             $array = unpack("C*", $status);
+            $this->last_status = $array;
             $this->color = array_splice($array, 6, 3);
+            $this->power = $array[2] == 35;
             return $array;
         }
 
