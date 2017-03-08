@@ -4,6 +4,12 @@
     <title>Color Table</title>
 
     <style>
+        .currentStatus {
+            display: block;
+            font-family: monospace;
+            white-space: pre;
+            margin: 1em 0;
+        }
         .video img { width: 300px; height: 300px; }
         #colorchart{border:0;padding:0;border-collapse:collapse; width: 100%; height: 100%;}
         #colorchart .block{width:50px;height:30px;}
@@ -133,18 +139,18 @@
 <body>
 
     <div class="content">
+        <?php /*
         <div class="video">
-            <video width="320" height="240" src="http://admin:pw4Admin@192.168.1.81/mjpeg.cgi">
-                Your browser does not support the video tag.
-            </video>
-            <?php /*<img src="http://admin:pw4Admin@192.168.1.81/mjpeg.cgi"> */ ?>
+            <img src="http://admin:pw4Admin@192.168.1.81/mjpeg.cgi">
         </div>
+        */ ?>
         <div class="controls">
             <button class="toggleOn">On</button>
             <button class='toggleOff'>Off</button>
+            <button class='toggle'>Toggle</button>
             <button class="status">Status</button>
         </div>
-        <div class="status"></div>
+        <div class="currentStatus"></div>
         <div class="colors"></div>
     </div>
     
@@ -163,7 +169,9 @@
                 $div: $('div.colors'),
                 $controls: $('.controls'),
                 $colors: $('.colors'),
+                $status: $('.currentStatus'),
 
+                power: false,
                 currentColor: [],
 
                 init: function(){
@@ -176,16 +184,20 @@
                 },
 
                 updateColor: function (p) {
-                    //console.log( p );
+                    console.log( 'updateColor' );
                     $.get(this.url + 'color/' + p);
                 },
 
                 toggle: function (on) {
-                    this.toggleColors(on);
+                    console.log( 'toggle' );
+                    if (typeof on == 'undefined') {
+                        on = !this.power;
+                    }
+                    //this.toggleColors(on);
                     if (on) {
-                        return $.get(this.url + 'on');
+                        return this.api('on');
                     } 
-                    return $.get(this.url + 'off');
+                    return this.api('off');
                 },
 
                 rgb: function (s) {
@@ -195,10 +207,18 @@
                 },
 
                 setColor: function(color) {
+                    //console.log( 'setColor' );
                     this.currentColor = color;
                 },
 
+                debugStatus: function(status) {
+                    console.log( status );
+                    
+                    this.$status.html(JSON.stringify(status));
+                },
+
                 toggleColors: function(show){
+                    //console.log( 'toggleColors' );
                     if (show) {
                         this.$colors.show();
                     } else {
@@ -206,18 +226,37 @@
                     }
                 },
 
-                getStatus: function () {
+                parseRespose: function(resp, callback) {
+                    this.debugStatus(resp);
+                    this.power = resp.power;
+                    this.setColor(resp.color);
+                    this.toggleColors(resp.power);
+                    if (callback) {
+                        return callback();
+                    }
+                    return resp;
+                },
+
+                api: function(call, callback) {
                     var self = this;
-                    $.get(this.url + 'status')
+                    $.get(this.url + call)
                         .done(function(resp){
+                            //console.log( resp );
                             if (resp.status) {
-                                self.setColor(resp.color);
-                                self.toggleColors(true);
+                                console.log( call, resp );
+                                self.parseRespose(resp, callback);
                             }
                         })
                         .fail(function(error){
                             console.log( error );
                         });
+                },
+                
+                getStatus: function () {
+                    console.log( 'getStatus' );
+                    this.api('status', function(){
+                        console.log( 'done' );
+                    });
                 },
 
                 bind: function() {
@@ -229,6 +268,9 @@
                         }
                         if ($this.hasClass('toggleOff')) {
                             self.toggle(false);
+                        }
+                        if ($this.hasClass('toggle')) {
+                            self.toggle();
                         }
                         if ($this.hasClass('status')) {
                             self.getStatus();

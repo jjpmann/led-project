@@ -55,7 +55,7 @@
     $action = '';
     if (isset($actions[$request[0]])) {
         $action = $actions[$request[0]];
-
+        
         switch ($action) {
             case 'updateColor':
                 $r = safeColor(1);
@@ -70,12 +70,17 @@
                 break;
             default:
                 $resp = $controller->{$action}();
+                //$resp = $controller->status();
                 $color = $controller->getColor();
                 break;
         }
     }
 
+    $power = $controller->isOn();
+    
+
     $data = [
+        'power' => $power,
         'status'=> (bool) $resp, 
         'color' => $color
     ];
