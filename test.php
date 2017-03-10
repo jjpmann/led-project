@@ -3,11 +3,25 @@
 
     require 'MagicHomeApi.php';
     require 'BulbScanner.php';
+    require 'WifiBulb.php';
 
-    $scanner = new BulbScanner('192.168.1.100', '192.168.1.255');
-    $bulbs = $scanner->scan();
+    // $scanner = new BulbScanner('192.168.1.100', '192.168.1.255');
+    // $bulbs = $scanner->scan();
+    // echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $bulbs ); exit;
 
-    echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $bulbs ); exit;
+    $bulb = new WifiBulb('192.168.1.31');
+    // $bulb->updateColor(10,240,130,100);
+    // $bulb->updateColor(10,240,130,40);
+
+    $s = $bulb->toggle();
+    die('done');
+    $s = $bulb->status();
+    $c = $bulb->getColor();
+    echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $s, $c ); exit;
+    
+
+
+    
     
 
 

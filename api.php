@@ -22,6 +22,7 @@
     $actions = [
         'on'    => 'turnOn',
         'off'   => 'turnOff',
+        'toggle'=> 'toggle',
         'color' => 'updateColor',
         'status'=> 'status'
     ];
@@ -31,8 +32,8 @@
 
     }
 
-  function safeColor($index) 
-  {
+    function safeColor($index) 
+    {
         global $request;
         $num = 0;
         if (isset($request[$index])) {

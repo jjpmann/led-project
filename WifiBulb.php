@@ -1,6 +1,6 @@
 <?php
 
-class MagicHomeApi 
+class WifiBulb
 {
     const API_PORT = 5577;
 
@@ -53,35 +53,70 @@ class MagicHomeApi
     {
         $this->log('Get status from Controller.');
         socket_clear_error();
-        $status = $this->send(0x81, 0x8A, 0x8B);
+        $this->send(0x81, 0x8A, 0x8B);
+        $status = $this->waitResponse();
+
+        if ($status) {
+            $array = unpack("C*", $status);
+            $this->last_status = $array;
+            $this->color = array_splice($array, 6, 3);
+            $this->power = $array[2] == 35;
+            return $this->last_status;
+        }
+
+        // pattern = rx[3]
+        // ww_level = rx[9]
+        // mode = self.__determineMode(ww_level, pattern)
         // echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $status ); exit;
         
-        return $this->waitResponse();
+        return false;
     }
 
-    public function updateColor($r = 0, $g = 0, $b = 0)
+    public function updateColor($r = 0, $g = 0, $b = 0, $brightness = 50)
     {
         $this->log("Tring to update color: {$r}, {$g}, {$b}.");
-        $msg = [
-            0x31, 
+
+        $this->color = [
             $this->checkNumberRange($r), 
             $this->checkNumberRange($g), 
-            $this->checkNumberRange($b),
+            $this->checkNumberRange($b)
+        ];
+
+        $this->setBrightness($brightness);
+
+        $msg = [
+            0x31, 
+            $this->color[0],
+            $this->color[1],
+            $this->color[2],
             0x00,
             0x00, 
             0x0f
         ];
+
         $this->send(...$msg);
+    }
 
-        //return $this->waitResponse();
-
-        // sleep(3);
-        // return $this->status();
+    public function setBrightness($brightness = 100)
+    {
+        #Check if the given number is in the allowed range.
+        if ($brightness < 10) {
+            $brightness = 10;
+        }
+        if ($brightness > 100) {
+            $brightness = 100;
+        } 
+        
+        $brightness = $brightness/100;
+    
+        foreach ($this->color as $i => $color) {
+            $this->color[$i] = (int) $color * $brightness;
+        }
+       
     }
 
     public function isOn()
     {
-        // $this->status();
         return $this->power;
     }
 
@@ -94,21 +129,16 @@ class MagicHomeApi
         return $this->turnOn();
     }
 
-
     public function turnOff()
     {   
         $this->log("Trying to turn off node.");
         $this->send(0x71, 0x24, 0x0F);
-        // sleep(.4);
-        // return $this->status();
     }
 
     public function turnOn()
     {   
         $this->log("Trying to turn on node.");
         $this->send(0x71, 0x23, 0x0F);
-        // sleep(.4);
-        // return $this->status();
     }
 
     protected function send(...$bytes)
@@ -133,31 +163,18 @@ class MagicHomeApi
         if ($this->debug) {
             echo print_r($this->messages, true);
         }
-
-        // $status  = false;
-        // $bytes = socket_recv($this->sock, $status, 14, MSG_WAITALL);
-
-        // echo "<pre>".__FILE__.'<br>'.__METHOD__.' : '.__LINE__."<br><br>"; var_dump( $bytes ); exit;
-        
-        // if ($status) {
-        //     $array = unpack("C*", $status);
-        //     $this->last_status = $array;
-        //     $this->color = array_splice($array, 6, 3);
-        //     $this->power = $array[2] == 35;
-        //     return $array;
-        // }
-        
-        // return false;
     }
 
-    function waitResponse($response = "") 
+    function waitResponse($bytes = 14) 
     {
         $this->log('Trying to get response from Controller.');
-        $status = "";
+        $response = $status = "";
+
         $tries = 3;
         $counter = 0;
+
         while ($status == $response) {
-            $status = socket_read($this->sock, 14);
+            $status = socket_read($this->sock, $bytes);
             if(!$status){
                 if($counter >= $tries){
                     break;
@@ -167,14 +184,6 @@ class MagicHomeApi
                 }
             }
         }
-        if ($status) {
-            $array = unpack("C*", $status);
-            $this->last_status = $array;
-            $this->color = array_splice($array, 6, 3);
-            $this->power = $array[2] == 35;
-            return $array;
-        }
-
         return $status;
     }
 
